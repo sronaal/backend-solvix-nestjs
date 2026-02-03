@@ -18,7 +18,9 @@ export class User {
     @Column('text')
     hash_password: string
 
-    @Column('bool')
+    @Column('bool', {
+        default: true
+    })
     activo: boolean
 
     @Column('text')
