@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "src/user/entities/user.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({name: 'roles'})
 export class Role {
@@ -12,5 +13,10 @@ export class Role {
         default: 'SOLICITANTE'
     })
     nombre_rol: string
-    
+
+    @OneToMany(() => User, 
+    (user) => user.role,
+    {onDelete: 'CASCADE'}
+    )
+    users: User[]
 }
