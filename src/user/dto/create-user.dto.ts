@@ -1,4 +1,5 @@
-import { IsBoolean, IsEmail, IsOptional, IsString, MinLength } from "class-validator"
+import { IsBoolean, IsEmail, IsEnum, IsOptional, IsString, MinLength } from "class-validator"
+import { Role } from "src/roles/entities/role.entity"
 
 export class CreateUserDto {
 
@@ -29,5 +30,9 @@ export class CreateUserDto {
 
     @IsString()
     departamento: string
+
+    @IsEnum(['ADMIN', 'TECNICO', 'SOLICITANTE'])
+    @IsOptional()
+    role?: string
 
 }

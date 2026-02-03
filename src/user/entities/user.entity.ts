@@ -44,7 +44,7 @@ export class User {
     @ManyToOne(
     () => Role,
     (rol) => rol.users,
-    { cascade: true, eager: true }
+    {  }
     )
     role: Role
 
