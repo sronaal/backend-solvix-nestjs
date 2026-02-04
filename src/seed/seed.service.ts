@@ -15,8 +15,8 @@ export class SeedService {
 
 
   async runSeed(){
-    //await this.rolService.deteleAllRoles()
-    //await this.createRols()
+    await this.rolService.deteleAllRoles()
+    await this.createRols()
     await this.userServices.deleteAllUsers()
     await this.createUsers()
   }
@@ -43,7 +43,7 @@ export class SeedService {
     const users = USERS_SEED
 
     users.forEach(user => {
-        insertPromisesUsers.push(this.userServices.create({password: user.hash_password, ...user}))
+        insertPromisesUsers.push(this.userServices.create({password: user.hash_password, role: user.roleName, ...user}))
     })
     
     await Promise.all(insertPromisesUsers)
