@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { RolesService } from '../roles/roles.service';
 import { ROLES_SEED, USERS_SEED, TICKETS_SEED } from './data/data_users';
-import { UserService } from 'src/user/user.service';
-import { CreateUserDto } from 'src/user/dto/create-user.dto';
-import { TicketsService } from 'src/tickets/tickets.service';
+import { UserService } from '../user/user.service';
+import { CreateUserDto } from '../user/dto/create-user.dto';
+import { TicketsService } from '../tickets/tickets.service';
 
 
 @Injectable()

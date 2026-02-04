@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { SeedService } from './seed.service';
 import { SeedController } from './seed.controller';
-import { RolesModule } from 'src/roles/roles.module';
-import { UserModule } from 'src/user/user.module';
-import { TicketsModule } from 'src/tickets/tickets.module';
+import { RolesModule } from '../roles/roles.module';
+import { UserModule } from '../user/user.module';
+import { TicketsModule } from '../tickets/tickets.module';
 
 @Module({
   imports: [RolesModule, UserModule, TicketsModule],

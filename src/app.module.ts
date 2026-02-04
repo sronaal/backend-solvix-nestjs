@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { UserModule } from './user/user.module';
+import { UserModule } from 'src/modules/user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RolesModule } from './roles/roles.module';
-import { SeedModule } from './seed/seed.module';
-import { TicketsModule } from './tickets/tickets.module';
+import { RolesModule } from 'src/modules/roles/roles.module';
+import { SeedModule } from 'src/modules/seed/seed.module';
+import { TicketsModule } from 'src/modules/tickets/tickets.module';
 
 @Module({
   imports: [
