@@ -16,7 +16,9 @@ export class User {
     @Column('text')
     correo: string
 
-    @Column('text')
+    @Column('text', {
+        select: false
+    })
     hash_password: string
 
     @Column('bool', {

@@ -35,8 +35,37 @@ export class UserService {
     await this.userRepository.save(userCreate)
   }
 
-  findAll() {
-    return this.userRepository.find({});
+  async findAll() {
+    let users = await this.userRepository
+    .createQueryBuilder('users')
+    .leftJoinAndSelect('users.role', 'roles')
+    .select([
+      "users.id",
+      "users.nombres",
+      "users.apellidos",
+      "users.correo",
+      "users.activo",
+      "users.telefono",
+      "users.departamento",      
+      "roles.nombre_rol"
+    ])
+    .getMany()
+    
+    let usersData = users.map( user => ({
+      "id": user.id,
+      "nombres": user.nombres,
+      "apellidos": user.apellidos,
+      "correo": user.correo,
+      "telefono": user.telefono,
+      "departamento": user.departamento,
+      "rol": user.role.nombre_rol,
+      "activo": user.activo,
+      
+
+    })
+    )
+    
+    return usersData
   }
 
   findOne(id: number) {
