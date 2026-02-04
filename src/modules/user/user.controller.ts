@@ -24,7 +24,7 @@ export class UserController {
 
   @Get('rol/:rol')
   findUserRol(@Param('rol') rol : string){
-    return this.userService.findUserByRol(rol)
+    return this.userService.findUserByRol(rol.toLocaleUpperCase())
   }
 
 

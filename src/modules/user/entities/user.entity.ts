@@ -1,5 +1,5 @@
-import { Role } from "src/roles/entities/role.entity";
-import { Ticket } from "src/tickets/entities/ticket.entity";
+import { Role } from "../../roles/entities/role.entity";
+import { Ticket } from "../../tickets/entities/ticket.entity";
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity({name: 'users'})

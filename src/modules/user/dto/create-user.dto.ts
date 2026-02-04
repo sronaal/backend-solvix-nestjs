@@ -1,5 +1,5 @@
 import { IsBoolean, IsEmail, IsEnum, IsOptional, IsString, MinLength } from "class-validator"
-import { Role } from "src/roles/entities/role.entity"
+import { Role } from "../../roles/entities/role.entity"
 
 export class CreateUserDto {
 

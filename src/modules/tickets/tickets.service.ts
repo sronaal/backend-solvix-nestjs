@@ -48,8 +48,34 @@ export class TicketsService {
 
   }
 
-  findAll() {
-    return `This action returns all tickets`;
+  async findAllTicketsForTabla() {
+    const ticketsFind = await this.ticketRepository.find({
+      relations: {
+        solicitante: true,
+        tecnico: true
+      }
+    })
+
+    let tickets: any[] = []
+    ticketsFind.map(ticket => {
+
+      let ticketData = {
+        "numero": ticket.numero,
+        "titulo": ticket.titulo,
+        "descripcion": ticket.descripcion,
+        "fecha_creado": ticket.fecha_creado,
+        "fecha_cierra": ticket.fecha_cierre,
+        "fecha_actualizacion": ticket.fecha_actualizacion,
+        "solicitante": `${ticket.solicitante.nombres} ${ticket.solicitante.apellidos}`,
+        "tecnico": `${ticket.tecnico.nombres} ${ticket.tecnico.apellidos}`
+      }
+      tickets.push(ticketData)
+      
+      
+    })
+
+    return tickets
+    
   }
 
   findOne(id: number) {
