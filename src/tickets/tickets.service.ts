@@ -1,11 +1,42 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
+import { Repository } from 'typeorm';
+import { Ticket } from './entities/ticket.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/user/entities/user.entity';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class TicketsService {
-  create(createTicketDto: CreateTicketDto) {
-    return 'This action adds a new ticket';
+
+  constructor(
+    @InjectRepository(Ticket)
+    private readonly ticketRepository: Repository<Ticket>,
+
+    private readonly userService: UserService
+  ) { }
+
+
+
+  async create(createTicketDto: CreateTicketDto) {
+
+    let { solicitante, ...ticket } = createTicketDto
+
+    let solicitanteFind = await this.userService.findOne(solicitante)
+
+    const ticketCreate = this.ticketRepository.create({
+      numero: ticket.numero,
+      titulo: ticket.titulo,
+      descripcion: ticket.descripcion,
+      solicitante: solicitanteFind
+    })
+
+    await this.ticketRepository.save(ticketCreate)
+
+    return { ticketCreate }
+
+
   }
 
   findAll() {

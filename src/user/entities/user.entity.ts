@@ -1,5 +1,6 @@
 import { Role } from "src/roles/entities/role.entity";
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Ticket } from "src/tickets/entities/ticket.entity";
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity({name: 'users'})
 export class User {
@@ -49,5 +50,11 @@ export class User {
     {  }
     )
     role: Role
+
+    @OneToMany(() => Ticket, ticket => ticket.solicitante)
+    ticketsCreados: Ticket[]
+
+    @OneToMany(() => Ticket, ticket => ticket.tecnico)
+    ticketsAsignados: Ticket[]
 
 }
