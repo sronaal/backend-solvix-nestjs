@@ -13,6 +13,8 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
     private readonly rolesService: RolesService,
     private readonly dataSource: DataSource
   ) { }
@@ -37,21 +39,21 @@ export class UserService {
 
   async findAll() {
     let users = await this.userRepository
-    .createQueryBuilder('users')
-    .leftJoinAndSelect('users.role', 'roles')
-    .select([
-      "users.id",
-      "users.nombres",
-      "users.apellidos",
-      "users.correo",
-      "users.activo",
-      "users.telefono",
-      "users.departamento",      
-      "roles.nombre_rol"
-    ])
-    .getMany()
-    
-    let usersData = users.map( user => ({
+      .createQueryBuilder('users')
+      .leftJoinAndSelect('users.role', 'roles')
+      .select([
+        "users.id",
+        "users.nombres",
+        "users.apellidos",
+        "users.correo",
+        "users.activo",
+        "users.telefono",
+        "users.departamento",
+        "roles.nombre_rol"
+      ])
+      .getMany()
+
+    let usersData = users.map(user => ({
       "id": user.id,
       "nombres": user.nombres,
       "apellidos": user.apellidos,
@@ -60,21 +62,40 @@ export class UserService {
       "departamento": user.departamento,
       "rol": user.role.nombre_rol,
       "activo": user.activo,
-      
+
 
     })
     )
-    
+
     return usersData
   }
 
   async findOne(id: string) {
-    
-    let user = await this.userRepository.findOneBy({id: id})
-  
-    if(!user) throw new NotFoundException(`User with id ${id} not found`)
+
+    let user = await this.userRepository.findOneBy({ id: id })
+
+    if (!user) throw new NotFoundException(`User with id ${id} not found`)
 
     return user
+  }
+
+  async findUserByRol(rol: string) {
+    const role = await this.roleRepository.findOne({
+      where: { nombre_rol: rol }
+    });
+
+    if (!role) {
+      throw new NotFoundException(`Rol with name ${rol} not found`);
+    }
+
+    const users = await this.userRepository.find({
+      where: {
+        role: { id: role.id }
+      },
+      relations: ['role']
+    });
+
+    return users;
   }
 
 

@@ -6,6 +6,7 @@ import { Ticket } from './entities/ticket.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class TicketsService {
@@ -13,7 +14,7 @@ export class TicketsService {
   constructor(
     @InjectRepository(Ticket)
     private readonly ticketRepository: Repository<Ticket>,
-
+    private readonly dataSource: DataSource,
     private readonly userService: UserService
   ) { }
 
@@ -61,5 +62,27 @@ export class TicketsService {
 
   remove(id: number) {
     return `This action removes a #${id} ticket`;
+  }
+
+  async deleteAllTickets(){
+    const queryRunner = this.dataSource.createQueryRunner()
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
+
+    try {
+      await queryRunner.manager
+      .createQueryBuilder()
+      .delete()
+      .from(Ticket)
+      .execute()
+
+      await queryRunner.commitTransaction()
+    } catch (error) {
+      await queryRunner.rollbackTransaction()
+      console.log(error)
+    } finally{
+      await queryRunner.release()
+    }
+
   }
 }

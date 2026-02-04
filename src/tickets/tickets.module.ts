@@ -7,14 +7,15 @@ import { UserService } from 'src/user/user.service';
 import { UserModule } from 'src/user/user.module';
 
 @Module({
-  imports:[
+  imports: [
     TypeOrmModule.forFeature([Ticket]),
     UserModule
   ],
-  exports:[
+  exports: [
     TypeOrmModule,
+    TicketsService
   ],
   controllers: [TicketsController],
   providers: [TicketsService],
 })
-export class TicketsModule {}
+export class TicketsModule { }
