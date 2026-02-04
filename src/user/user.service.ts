@@ -70,7 +70,7 @@ export class UserService {
 
   async findOne(id: string) {
     
-    let user = await this.userRepository.findOne({where: { id }})
+    let user = await this.userRepository.findOneBy({id: id})
   
     if(!user) throw new NotFoundException(`User with id ${id} not found`)
 

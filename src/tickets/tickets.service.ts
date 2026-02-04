@@ -21,20 +21,28 @@ export class TicketsService {
 
   async create(createTicketDto: CreateTicketDto) {
 
-    let { solicitante, ...ticket } = createTicketDto
+    let { solicitante, tecnico, ...ticket } = createTicketDto
 
     let solicitanteFind = await this.userService.findOne(solicitante)
+
+    let tecnicoFind : User | null = null
+    
+    if(tecnico) {
+       tecnicoFind = await this.userService.findOne(tecnico)
+    }
 
     const ticketCreate = this.ticketRepository.create({
       numero: ticket.numero,
       titulo: ticket.titulo,
       descripcion: ticket.descripcion,
-      solicitante: solicitanteFind
+      solicitante: solicitanteFind,
+      ...(tecnicoFind && {tecnico: tecnicoFind})
+      
     })
 
     await this.ticketRepository.save(ticketCreate)
 
-    return { ticketCreate }
+    return ticketCreate
 
 
   }

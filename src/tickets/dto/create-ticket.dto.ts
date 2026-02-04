@@ -1,4 +1,4 @@
-import { IsNumber, IsString,  MinLength } from "class-validator"
+import { IsNumber, IsOptional, IsString,  MinLength } from "class-validator"
 
 export class CreateTicketDto {
 
@@ -15,5 +15,9 @@ export class CreateTicketDto {
 
     @IsString()
     solicitante: string
+
+    @IsString()
+    @IsOptional()
+    tecnico: string
     
 }
