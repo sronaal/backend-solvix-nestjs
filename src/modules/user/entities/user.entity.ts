@@ -1,6 +1,7 @@
+import * as bcrypt from 'bcrypt';
 import { Role } from "../../roles/entities/role.entity";
 import { Ticket } from "../../tickets/entities/ticket.entity";
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { BeforeInsert, Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity({name: 'users'})
 export class User {
@@ -43,6 +44,11 @@ export class User {
     })
     updateAt: Date
 
+
+    @BeforeInsert()
+    async convertir_password_hash(){
+        this.hash_password = await bcrypt.hash(this.hash_password,10)
+    }
 
     @ManyToOne(
     () => Role,
