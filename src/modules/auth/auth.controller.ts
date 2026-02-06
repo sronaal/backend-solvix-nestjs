@@ -7,8 +7,8 @@ import { AuthDTO } from './dto/auth-dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post()
+  @Post('login')
   iniciarSesion(authDTO: AuthDTO){
-    this.authService.iniciarSesion(authDTO)
+    return this.authService.iniciarSesion(authDTO)
   }
 }
