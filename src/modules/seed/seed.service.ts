@@ -17,10 +17,10 @@ export class SeedService {
 
 
   async runSeed() {
-    //await this.rolService.deteleAllRoles()
-    //await this.createRols()
-    //await this.userServices.deleteAllUsers()
-    //await this.createUsers()
+    await this.rolService.deteleAllRoles()
+    await this.createRols()
+    await this.userServices.deleteAllUsers()
+    await this.createUsers()
     await this.ticketServices.deleteAllTickets()
     await this.createTickets()
 
