@@ -6,7 +6,7 @@ import { RolesModule } from 'src/modules/roles/roles.module';
 import { SeedModule } from 'src/modules/seed/seed.module';
 import { TicketsModule } from 'src/modules/tickets/tickets.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { ComentariosModule } from './comentarios/comentarios.module';
+import { ComentariosModule } from './modules/comentarios/comentarios.module';
 
 @Module({
   imports: [
