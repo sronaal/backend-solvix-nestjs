@@ -7,8 +7,10 @@ export class Ticket {
     @PrimaryGeneratedColumn('uuid')
     id: string
 
-    @Column('int')
-    numero: number
+    @Column('int',{
+        unique: true,
+    })
+    numero_ticket: number
 
     @Column('text')
     titulo: string

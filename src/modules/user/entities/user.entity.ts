@@ -15,7 +15,9 @@ export class User {
     @Column('text')
     apellidos: string
 
-    @Column('text')
+    @Column('text', {
+        unique: true
+    })
     correo: string
 
     @Column('text', {
