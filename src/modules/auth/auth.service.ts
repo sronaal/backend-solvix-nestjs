@@ -27,14 +27,11 @@ export class AuthService {
   async iniciarSesion(authDTO: AuthDTO) {
     
     const { correo, password} = authDTO
-   
 
     const user = await this.userService.findUserByCorreoForAuth(correo)
-    
     if (!await bcrypt.compare(password, user.hash_password)) throw new UnauthorizedException('Correo y/o contraseña invalidos')
 
     const token = this.generateJWT({ id: user.id, activo: user.activo, rol: user.role.nombre_rol })
-    console.log({user})
     return {
       id: user.id,
       nombre_usuario:  `${user.nombres} ${user.apellidos}`,

@@ -9,7 +9,7 @@ export class AuthController {
 
   @Post('login')
   iniciarSesion(@Body() authDTO: AuthDTO){
-    console.log("Controller", authDTO)
+    
     return this.authService.iniciarSesion(authDTO)
   }
 }
