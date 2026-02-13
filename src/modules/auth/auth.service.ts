@@ -6,6 +6,8 @@ import { AuthDTO } from './dto/auth-dto';
 import { User } from '../user/entities/user.entity';
 
 import { UserService } from '../user/user.service';
+import { JWTPayload } from './dto/payload-jwt';
+import { JwtService } from '@nestjs/jwt';
 
 
 
@@ -15,23 +17,43 @@ export class AuthService {
 
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>
-  ){
+    private readonly userRepository: Repository<User>,
+    private readonly jwtService: JwtService,
+    private readonly userService: UserService
+  ) {
 
   }
+
+  async iniciarSesion(authDTO: AuthDTO) {
+    
+    const { correo, password} = authDTO
+   
+
+    const user = await this.userService.findUserByCorreoForAuth(correo)
+    
+    if (!await bcrypt.compare(password, user.hash_password)) throw new UnauthorizedException('Correo y/o contraseña invalidos')
+
+    const token = this.generateJWT({ id: user.id, activo: user.activo, rol: user.role.nombre_rol })
+    console.log({user})
+    return {
+      nombre_usuario:  `${user.nombres} ${user.apellidos}`,
+      activo: user.activo,
+      rol: user.role.nombre_rol,
+      token
+    }
+
+  }
+
   
-  async iniciarSesion(authDTO: AuthDTO){
 
-    const { password, correo} = authDTO
-    const user = await this.userRepository.findOneBy({correo})
 
-    if(!user) throw new UnauthorizedException('Correo y/o contraseña invalidos')
-    
-    if(!await bcrypt.compare(authDTO.password, user.hash_password)) throw new UnauthorizedException('Correo y/o contraseña invalidos') 
-    
-    // to-do generar jwt 
-    
-    return user
-    
+
+
+
+  private generateJWT(payload: JWTPayload) {
+
+    const token = this.jwtService.sign(payload)
+
+    return token
   }
 }

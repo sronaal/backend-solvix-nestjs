@@ -10,7 +10,9 @@ import { ComentariosModule } from './modules/comentarios/comentarios.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({}),    
+    ConfigModule.forRoot({
+      isGlobal: true
+    }),    
     TypeOrmModule.forRoot({
       type: 'postgres',
       username: process.env.DB_USERNAME,

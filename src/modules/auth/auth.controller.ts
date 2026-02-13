@@ -8,7 +8,8 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  iniciarSesion(authDTO: AuthDTO){
+  iniciarSesion(@Body() authDTO: AuthDTO){
+    console.log("Controller", authDTO)
     return this.authService.iniciarSesion(authDTO)
   }
 }

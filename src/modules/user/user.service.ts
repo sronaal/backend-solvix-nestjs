@@ -70,6 +70,27 @@ export class UserService {
     return usersData
   }
 
+ async findUserByCorreoForAuth(correo: string) {
+
+  const user = await this.userRepository
+    .createQueryBuilder('user')
+    .leftJoinAndSelect('user.role', 'role')
+    .select([
+      'user.id',
+      'user.nombres',
+      'user.apellidos',
+      'user.correo',
+      'user.hash_password',
+      'user.activo',
+      'role.nombre_rol'
+    ])
+    .where('user.correo = :correo', { correo })
+    .getOne();
+
+  return user;
+}
+
+
   async findOne(id: string) {
 
     let user = await this.userRepository.findOneBy({ id: id })

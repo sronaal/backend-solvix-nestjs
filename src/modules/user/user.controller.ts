@@ -22,6 +22,11 @@ export class UserController {
     return this.userService.findOne(id);
   }
 
+  @Get('correo/:email')
+  findEmail(@Param('email') email: string){
+    return this.userService.findUserByCorreoForAuth(email)
+  }
+
   @Get('rol/:rol')
   findUserRol(@Param('rol') rol : string){
     return this.userService.findUserByRol(rol.toLocaleUpperCase())
