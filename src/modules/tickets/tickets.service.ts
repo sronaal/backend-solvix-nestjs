@@ -83,13 +83,6 @@ export class TicketsService {
     return `This action returns a #${id} ticket`;
   }
 
-  update(id: number, updateTicketDto: UpdateTicketDto) {
-    return `This action updates a #${id} ticket`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} ticket`;
-  }
 
   async deleteAllTickets(){
     const queryRunner = this.dataSource.createQueryRunner()
