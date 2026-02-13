@@ -22,5 +22,13 @@ export class TicketsController {
     return this.ticketsService.findOne(+id);
   }
 
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() updateTicketDTO: UpdateTicketDto
+    ){
+    return this.ticketsService.update(id, updateTicketDTO)
+  }
+
 
 }

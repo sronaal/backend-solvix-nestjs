@@ -107,9 +107,27 @@ export class TicketsService {
       }
     })
 
-    console.log({ticket})
+    if(!ticket) throw new NotFoundException(`ticket with id ${id} not found`)
     
-    return ticket
+    const queryRunner = this.dataSource.createQueryRunner()
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
+
+    try {
+      await queryRunner.manager.save(ticket)
+
+      await queryRunner.commitTransaction()
+      await queryRunner.release()
+      return ticket
+    } catch (error) {
+      console.log(error)
+      await queryRunner.rollbackTransaction()
+
+    }
+
+
+
+
   }
 
   async deleteAllTickets(){
