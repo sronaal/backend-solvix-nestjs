@@ -64,6 +64,7 @@ export class TicketsService {
         "numero": ticket.numero_ticket,
         "titulo": ticket.titulo,
         "descripcion": ticket.descripcion,
+        "estado": ticket.estado,
         "fecha_creado": ticket.fecha_creado,
         "fecha_cierra": ticket.fecha_cierre,
         "fecha_actualizacion": ticket.fecha_actualizacion,
@@ -81,8 +82,14 @@ export class TicketsService {
 
   findOne(id: number) {
     return `This action returns a #${id} ticket`;
+  
+    
   }
 
+  async cambiarEstadoTicket(numero_ticket: string, estado: string){
+
+
+  }
 
   async deleteAllTickets(){
     const queryRunner = this.dataSource.createQueryRunner()
