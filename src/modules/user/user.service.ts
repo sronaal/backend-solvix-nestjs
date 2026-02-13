@@ -118,16 +118,6 @@ export class UserService {
     return users;
   }
 
-
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
-  }
-
   async deleteAllUsers() {
     const queryRunner = this.dataSource.createQueryRunner()
     await queryRunner.connect()
