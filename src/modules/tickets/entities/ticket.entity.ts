@@ -23,7 +23,7 @@ export class Ticket {
 
     @Column({
         type: 'enum',
-        enum: ['ACTIVO', 'ESPERA', 'RESUELTO'],
+        enum: ['SIN ASIGNAR','ACTIVO', 'ESPERA', 'RESUELTO'],
         default: 'ACTIVO'
     })
     estado: string
