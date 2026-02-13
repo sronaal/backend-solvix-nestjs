@@ -33,7 +33,8 @@ export class TicketsService {
     }
 
     const ticketCreate = this.ticketRepository.create({
-      numero: ticket.numero,
+
+      numero_ticket: ticket.numero,
       titulo: ticket.titulo,
       descripcion: ticket.descripcion,
       solicitante: solicitanteFind,
@@ -60,7 +61,7 @@ export class TicketsService {
     ticketsFind.map(ticket => {
 
       let ticketData = {
-        "numero": ticket.numero,
+        "numero": ticket.numero_ticket,
         "titulo": ticket.titulo,
         "descripcion": ticket.descripcion,
         "fecha_creado": ticket.fecha_creado,
