@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { Repository } from 'typeorm';
@@ -61,6 +61,7 @@ export class TicketsService {
     ticketsFind.map(ticket => {
 
       let ticketData = {
+        "id": ticket.id,
         "numero": ticket.numero_ticket,
         "titulo": ticket.titulo,
         "descripcion": ticket.descripcion,
@@ -80,15 +81,35 @@ export class TicketsService {
     
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} ticket`;
-  
+  async findOne(id: number) {
+    
+    const ticket = await this.ticketRepository.findOneBy({ numero_ticket: id })
+
+    if(!ticket) throw new NotFoundException(`ticket with number ${id} no found`)
+    
+    return ticket
     
   }
 
-  async cambiarEstadoTicket(numero_ticket: string, estado: string){
+  async update(id: string, ticketDTO: UpdateTicketDto){
 
 
+    const ticket = await this.ticketRepository.preload({
+      id,
+      titulo: ticketDTO.titulo,
+      descripcion: ticketDTO.descripcion,
+      estado: ticketDTO.estado,
+      solicitante:{
+        id: ticketDTO.solicitante
+      },
+      tecnico:{
+        id: ticketDTO.tecnico
+      }
+    })
+
+    console.log({ticket})
+    
+    return ticket
   }
 
   async deleteAllTickets(){
