@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -27,14 +27,25 @@ export class UserService {
 
     const rol = await this.rolesService.findByOneName(role!)
 
-    const userCreate = this.userRepository.create({
-      ...rest,
-      role: rol,
-      hash_password: password
 
-    })
+    try {
+      const userEmail = await this.userRepository.findOneBy({ correo: rest.correo })
+      if (!userEmail) throw new NotFoundException(`User with ${rest.correo} exist in database`)
 
-    await this.userRepository.save(userCreate)
+      const userCreate = this.userRepository.create({
+        ...rest,
+        role: rol,
+        hash_password: password
+
+      })
+
+      await this.userRepository.save(userCreate)
+    } catch (error) {
+      this.handleErrors(error)
+    }
+
+
+
   }
 
   async findAll() {
@@ -85,7 +96,7 @@ export class UserService {
       ])
       .where('user.correo = :correo', { correo })
       .getOne();
-    if(!user) throw new NotFoundException(`User with email ${correo} not found`)
+    if (!user) throw new NotFoundException(`User with email ${correo} not found`)
     return user;
   }
 
@@ -141,5 +152,14 @@ export class UserService {
     } finally {
       await queryRunner.release()
     }
+  }
+
+  private handleErrors(error) {
+
+    if (error.code) {
+      throw new ConflictException(error.detail)
+    }
+
+    console.log(error)
   }
 }
