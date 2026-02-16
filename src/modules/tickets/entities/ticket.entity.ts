@@ -1,3 +1,4 @@
+import { Comentario } from "src/modules/comentarios/entities/comentario.entity";
 import { User } from "../../user/entities/user.entity";
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
@@ -48,4 +49,7 @@ export class Ticket {
 
     @ManyToOne(() => User, user => user.ticketsAsignados)
     tecnico: User
+
+    
+    comentario: Comentario
 }
