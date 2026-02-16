@@ -2,6 +2,7 @@ import * as bcrypt from 'bcrypt';
 import { Role } from "../../roles/entities/role.entity";
 import { Ticket } from "../../tickets/entities/ticket.entity";
 import { BeforeInsert, Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Comentario } from 'src/modules/comentarios/entities/comentario.entity';
 
 @Entity({name: 'users'})
 export class User {
@@ -64,5 +65,8 @@ export class User {
 
     @OneToMany(() => Ticket, ticket => ticket.tecnico)
     ticketsAsignados: Ticket[]
+
+    @OneToMany(() => Comentario, comentario => comentario.id_usuario)
+    comentariosHechos: Comentario[]
 
 }

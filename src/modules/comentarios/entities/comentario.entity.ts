@@ -1,6 +1,6 @@
 import { Ticket } from "src/modules/tickets/entities/ticket.entity";
 import { User } from "src/modules/user/entities/user.entity";
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { UpdateComentarioDto } from "../dto/update-comentario.dto";
 
 @Entity()
@@ -12,7 +12,9 @@ export class Comentario {
     
     id_ticket: Ticket
 
+    @ManyToOne(() => User, usuario => usuario.comentariosHechos)
     id_usuario: User
+    
     @Column({
         type:'text',
         

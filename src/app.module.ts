@@ -21,7 +21,7 @@ import { ComentariosModule } from './modules/comentarios/comentarios.module';
       host: process.env.DB_HOST,
       port: +process.env.DB_PORT!,
       autoLoadEntities: true,
-      synchronize: false,
+      synchronize: true,
       migrations:['src/migrations/.*ts']
     }),
     UserModule,
