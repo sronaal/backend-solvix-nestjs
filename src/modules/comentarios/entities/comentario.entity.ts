@@ -9,8 +9,8 @@ export class Comentario {
     @PrimaryGeneratedColumn('uuid')
     id: string
 
-    
-    id_ticket: Ticket
+    @ManyToOne(() => Ticket, ticket => ticket.comentario)
+    ticket: Ticket
 
     @ManyToOne(() => User, usuario => usuario.comentariosHechos)
     id_usuario: User
