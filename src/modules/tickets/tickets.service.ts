@@ -26,10 +26,10 @@ export class TicketsService {
 
     let solicitanteFind = await this.userService.findOne(solicitante)
 
-    let tecnicoFind : User | null = null
-    
-    if(tecnico) {
-       tecnicoFind = await this.userService.findOne(tecnico)
+    let tecnicoFind: User | null = null
+
+    if (tecnico) {
+      tecnicoFind = await this.userService.findOne(tecnico)
     }
 
     const ticketCreate = this.ticketRepository.create({
@@ -38,8 +38,8 @@ export class TicketsService {
       titulo: ticket.titulo,
       descripcion: ticket.descripcion,
       solicitante: solicitanteFind,
-      ...(tecnicoFind && {tecnico: tecnicoFind})
-      
+      ...(tecnicoFind && { tecnico: tecnicoFind })
+
     })
 
     await this.ticketRepository.save(ticketCreate)
@@ -73,25 +73,33 @@ export class TicketsService {
         "tecnico": `${ticket.tecnico.nombres} ${ticket.tecnico.apellidos}`
       }
       tickets.push(ticketData)
-      
-      
+
+
     })
 
     return tickets
-    
+
   }
 
   async findOne(id: number) {
-    
+
     const ticket = await this.ticketRepository.findOneBy({ numero_ticket: id })
 
-    if(!ticket) throw new NotFoundException(`ticket with number ${id} no found`)
-    
+    if (!ticket) throw new NotFoundException(`ticket with number ${id} no found`)
+
     return ticket
-    
+
   }
 
-  async update(id: string, ticketDTO: UpdateTicketDto){
+  async findOneById(id: string) {
+    console.log(id)
+    const ticket = await  this.ticketRepository.findOneBy({ id: id })
+    if (!ticket) throw new NotFoundException(`Ticket with primary key ${id} not found`)
+    console.log(ticket)
+    return ticket
+  }
+
+  async update(id: string, ticketDTO: UpdateTicketDto) {
 
 
     const ticket = await this.ticketRepository.preload({
@@ -99,16 +107,16 @@ export class TicketsService {
       titulo: ticketDTO.titulo,
       descripcion: ticketDTO.descripcion,
       estado: ticketDTO.estado,
-      solicitante:{
+      solicitante: {
         id: ticketDTO.solicitante
       },
-      tecnico:{
+      tecnico: {
         id: ticketDTO.tecnico
       }
     })
 
-    if(!ticket) throw new NotFoundException(`ticket with id ${id} not found`)
-    
+    if (!ticket) throw new NotFoundException(`ticket with id ${id} not found`)
+
     const queryRunner = this.dataSource.createQueryRunner()
     await queryRunner.connect()
     await queryRunner.startTransaction()
@@ -130,23 +138,23 @@ export class TicketsService {
 
   }
 
-  async deleteAllTickets(){
+  async deleteAllTickets() {
     const queryRunner = this.dataSource.createQueryRunner()
     await queryRunner.connect()
     await queryRunner.startTransaction()
 
     try {
       await queryRunner.manager
-      .createQueryBuilder()
-      .delete()
-      .from(Ticket)
-      .execute()
+        .createQueryBuilder()
+        .delete()
+        .from(Ticket)
+        .execute()
 
       await queryRunner.commitTransaction()
     } catch (error) {
       await queryRunner.rollbackTransaction()
       console.log(error)
-    } finally{
+    } finally {
       await queryRunner.release()
     }
 
