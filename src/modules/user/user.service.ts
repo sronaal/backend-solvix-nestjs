@@ -30,7 +30,7 @@ export class UserService {
 
     try {
       const userEmail = await this.userRepository.findOneBy({ correo: rest.correo })
-      if (userEmail) throw new NotFoundException(`User with ${rest.correo} exist in database`)
+      
 
       const userCreate = this.userRepository.create({
         ...rest,
