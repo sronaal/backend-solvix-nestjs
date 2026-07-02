@@ -1,14 +1,17 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository, DataSource, DataSourceOptions } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { Role } from '../roles/entities/role.entity';
 import { RolesService } from '../roles/roles.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
+
+  private readonly logger = new Logger(UserService.name);
 
   constructor(
     @InjectRepository(User)
@@ -28,23 +31,23 @@ export class UserService {
     const rol = await this.rolesService.findByOneName(role!)
 
 
-    try {
-      const userEmail = await this.userRepository.findOneBy({ correo: rest.correo })
-      
+    const existingUser = await this.userRepository.findOneBy({ correo: rest.correo });
+    if (existingUser) {
+      throw new ConflictException(`El correo ${rest.correo} ya está registrado`);
+    }
 
+    try {
       const userCreate = this.userRepository.create({
         ...rest,
         role: rol,
         hash_password: password
-
       })
 
       await this.userRepository.save(userCreate)
+      return this.sanitizeUser(userCreate);
     } catch (error) {
       this.handleErrors(error)
     }
-
-
 
   }
 
@@ -100,22 +103,18 @@ export class UserService {
     return user;
   }
 
-  async findUserById(id: string){
-
-    const user = await this.userRepository.findOneBy({id})
-    
-    if(!user) throw new NotFoundException(`User with id ${id} not found`)
-    
-    return user
+  async findUserById(id: string) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['role'],
+    });
+    if (!user) throw new NotFoundException(`Usuario con id ${id} no encontrado`);
+    return user;
   }
 
-
   async findOne(id: string) {
-
     let user = await this.userRepository.findOneBy({ id: id })
-
-    if (!user) throw new NotFoundException(`User with id ${id} not found`)
-
+    if (!user) throw new NotFoundException(`Usuario con id ${id} no encontrado`)
     return user
   }
 
@@ -125,7 +124,7 @@ export class UserService {
     });
 
     if (!role) {
-      throw new NotFoundException(`Rol with name ${rol} not found`);
+      throw new NotFoundException(`Rol con nombre ${rol} no encontrado`);
     }
 
     const users = await this.userRepository.find({
@@ -138,14 +137,62 @@ export class UserService {
     return users;
   }
 
+  async update(id: string, updateDto: UpdateUserDto) {
+    const user = await this.findUserById(id);
+
+    if (updateDto.role) {
+      const rol = await this.rolesService.findByOneName(updateDto.role);
+      user.role = rol;
+    }
+
+    if (updateDto.nombres) user.nombres = updateDto.nombres;
+    if (updateDto.apellidos) user.apellidos = updateDto.apellidos;
+    if (updateDto.correo) user.correo = updateDto.correo;
+    if (updateDto.telefono !== undefined) user.telefono = updateDto.telefono;
+    if (updateDto.departamento) user.departamento = updateDto.departamento;
+    if (updateDto.activo !== undefined) user.activo = updateDto.activo;
+
+    await this.userRepository.save(user);
+    return this.sanitizeUser(user);
+  }
+
+  async changePassword(id: string, currentPassword: string, newPassword: string) {
+    // Necesitamos el hash_password que está con select: false
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .addSelect('user.hash_password')
+      .where('user.id = :id', { id })
+      .getOne();
+
+    if (!user) throw new NotFoundException(`Usuario con id ${id} no encontrado`);
+
+    const isMatch = await bcrypt.compare(currentPassword, user.hash_password);
+    if (!isMatch) throw new BadRequestException('La contraseña actual no es correcta');
+
+    user.hash_password = await bcrypt.hash(newPassword, 10);
+    await this.userRepository.save(user);
+    return { mensaje: 'Contraseña actualizada correctamente' };
+  }
+
+  async deactivate(id: string) {
+    const user = await this.findOne(id);
+    user.activo = false;
+    await this.userRepository.save(user);
+    return { mensaje: 'Usuario desactivado correctamente' };
+  }
+
+  async remove(id: string) {
+    const user = await this.findOne(id);
+    await this.userRepository.remove(user);
+    return { mensaje: `Usuario ${user.nombres} ${user.apellidos} eliminado correctamente` };
+  }
+
   async deleteAllUsers() {
     const queryRunner = this.dataSource.createQueryRunner()
     await queryRunner.connect()
     await queryRunner.startTransaction()
 
     try {
-
-      // Elimina todos los registros de la tabla Roles
       await queryRunner.manager
         .createQueryBuilder()
         .delete()
@@ -153,22 +200,27 @@ export class UserService {
         .execute()
 
       await queryRunner.commitTransaction()
-
     } catch (error) {
-
       await queryRunner.rollbackTransaction()
-      console.log(error)
+      this.logger.error(`Error al eliminar usuarios: ${error.message}`, error.stack)
     } finally {
       await queryRunner.release()
     }
   }
 
+  private sanitizeUser(user: User) {
+    const { hash_password, ...safeUser } = user;
+    return safeUser;
+  }
+
   private handleErrors(error) {
-
-    if (error.code) {
-      throw new ConflictException(error.detail)
+    if (error instanceof ConflictException || error instanceof NotFoundException) {
+      throw error;
     }
-
-    console.log(error)
+    if (error.code === '23505') {
+      throw new ConflictException('El correo ya está registrado');
+    }
+    this.logger.error(`Error inesperado: ${error.message}`, error.stack);
+    throw error;
   }
 }
