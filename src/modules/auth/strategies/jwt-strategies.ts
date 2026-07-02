@@ -21,13 +21,28 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any) {
+  async validate(payload: { id: string; activo: boolean; rol: string }) {
+    const user = await this.userRepository.findOne({
+      where: { id: payload.id },
+      relations: ['role'],
+    });
 
-    
+    if (!user) {
+      throw new UnauthorizedException('Token inválido: usuario no encontrado');
+    }
 
+    if (!user.activo) {
+      throw new UnauthorizedException('Usuario inactivo — contacte al administrador');
+    }
 
-
-    //return user
+    return {
+      id: user.id,
+      nombres: user.nombres,
+      apellidos: user.apellidos,
+      correo: user.correo,
+      activo: user.activo,
+      rol: user.role.nombre_rol,
+    };
   }
 
 }
