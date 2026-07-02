@@ -29,6 +29,20 @@ export class Ticket {
     })
     estado: string
 
+    @Column({
+        type: 'enum',
+        enum: ['BAJA', 'MEDIA', 'ALTA', 'CRITICA'],
+        default: 'MEDIA'
+    })
+    prioridad: string
+
+    @Column({
+        type: 'varchar',
+        length: 100,
+        nullable: true
+    })
+    categoria: string
+
     @CreateDateColumn({
         type:'timestamp'
     })

@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString,  MinLength } from "class-validator"
+import { IsEnum, IsNumber, IsOptional, IsString, MinLength } from "class-validator"
 
 export class CreateTicketDto {
 
@@ -12,6 +12,14 @@ export class CreateTicketDto {
     @IsString()
     @MinLength(5)
     descripcion: string
+
+    @IsEnum(['BAJA', 'MEDIA', 'ALTA', 'CRITICA'])
+    @IsOptional()
+    prioridad?: string
+
+    @IsString()
+    @IsOptional()
+    categoria?: string
 
     @IsString()
     solicitante: string

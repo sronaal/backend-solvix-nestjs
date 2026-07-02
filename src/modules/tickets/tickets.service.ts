@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { Repository } from 'typeorm';
@@ -10,6 +10,8 @@ import { DataSource } from 'typeorm';
 
 @Injectable()
 export class TicketsService {
+
+  private readonly logger = new Logger(TicketsService.name);
 
   constructor(
     @InjectRepository(Ticket)
@@ -57,27 +59,22 @@ export class TicketsService {
       }
     })
 
-    let tickets: any[] = []
-    ticketsFind.map(ticket => {
-
-      let ticketData = {
-        "id": ticket.id,
-        "numero": ticket.numero_ticket,
-        "titulo": ticket.titulo,
-        "descripcion": ticket.descripcion,
-        "estado": ticket.estado,
-        "fecha_creado": ticket.fecha_creado,
-        "fecha_cierra": ticket.fecha_cierre,
-        "fecha_actualizacion": ticket.fecha_actualizacion,
-        "solicitante": `${ticket.solicitante.nombres} ${ticket.solicitante.apellidos}`,
-        "tecnico": `${ticket.tecnico.nombres} ${ticket.tecnico.apellidos}`
-      }
-      tickets.push(ticketData)
-
-
-    })
-
-    return tickets
+    return ticketsFind.map(ticket => ({
+      id: ticket.id,
+      numero: ticket.numero_ticket,
+      titulo: ticket.titulo,
+      descripcion: ticket.descripcion,
+      estado: ticket.estado,
+      prioridad: ticket.prioridad,
+      categoria: ticket.categoria,
+      fecha_creado: ticket.fecha_creado,
+      fecha_cierra: ticket.fecha_cierre,
+      fecha_actualizacion: ticket.fecha_actualizacion,
+      solicitante: `${ticket.solicitante.nombres} ${ticket.solicitante.apellidos}`,
+      tecnico: ticket.tecnico
+        ? `${ticket.tecnico.nombres} ${ticket.tecnico.apellidos}`
+        : null,
+    }))
 
   }
 
@@ -92,50 +89,39 @@ export class TicketsService {
   }
 
   async findOneById(id: string) {
-    console.log(id)
-    const ticket = await  this.ticketRepository.findOneBy({ id: id })
-    if (!ticket) throw new NotFoundException(`Ticket with primary key ${id} not found`)
-    console.log(ticket)
+    const ticket = await this.ticketRepository.findOneBy({ id })
+    if (!ticket) throw new NotFoundException(`Ticket con id ${id} no encontrado`)
     return ticket
   }
 
   async update(id: string, ticketDTO: UpdateTicketDto) {
 
-
     const ticket = await this.ticketRepository.preload({
       id,
-      titulo: ticketDTO.titulo,
-      descripcion: ticketDTO.descripcion,
-      estado: ticketDTO.estado,
-      solicitante: {
-        id: ticketDTO.solicitante
-      },
-      tecnico: {
-        id: ticketDTO.tecnico
-      }
+      ...(ticketDTO.titulo && { titulo: ticketDTO.titulo }),
+      ...(ticketDTO.descripcion && { descripcion: ticketDTO.descripcion }),
+      ...(ticketDTO.estado && { estado: ticketDTO.estado }),
+      ...(ticketDTO.solicitante && { solicitante: { id: ticketDTO.solicitante } }),
+      ...(ticketDTO.tecnico && { tecnico: { id: ticketDTO.tecnico } }),
+      ...(ticketDTO.prioridad && { prioridad: ticketDTO.prioridad }),
+      ...(ticketDTO.categoria && { categoria: ticketDTO.categoria }),
     })
 
-    if (!ticket) throw new NotFoundException(`ticket with id ${id} not found`)
-
-    const queryRunner = this.dataSource.createQueryRunner()
-    await queryRunner.connect()
-    await queryRunner.startTransaction()
+    if (!ticket) throw new NotFoundException(`Ticket con id ${id} no encontrado`)
 
     try {
-      await queryRunner.manager.save(ticket)
-
-      await queryRunner.commitTransaction()
-      await queryRunner.release()
-      return ticket
+      return await this.ticketRepository.save(ticket);
     } catch (error) {
-      console.log(error)
-      await queryRunner.rollbackTransaction()
-
+      this.logger.error(`Error al actualizar ticket ${id}: ${error.message}`, error.stack);
+      throw error;
     }
 
+  }
 
-
-
+  async remove(id: string) {
+    const ticket = await this.findOneById(id);
+    await this.ticketRepository.remove(ticket);
+    return { mensaje: `Ticket ${ticket.numero_ticket} eliminado correctamente` };
   }
 
   async deleteAllTickets() {
@@ -153,7 +139,7 @@ export class TicketsService {
       await queryRunner.commitTransaction()
     } catch (error) {
       await queryRunner.rollbackTransaction()
-      console.log(error)
+      this.logger.error(`Error al eliminar tickets: ${error.message}`, error.stack)
     } finally {
       await queryRunner.release()
     }
