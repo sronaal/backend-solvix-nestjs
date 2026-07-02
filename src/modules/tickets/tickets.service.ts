@@ -1,6 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
+import { QueryTicketDto } from './dto/query-ticket.dto';
 import { Repository } from 'typeorm';
 import { Ticket } from './entities/ticket.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -76,6 +77,78 @@ export class TicketsService {
         : null,
     }))
 
+  }
+
+  async findAllWithFilters(query: QueryTicketDto) {
+    const { estado, prioridad, categoria, tecnico, solicitante, search, page = 1, limit = 10 } = query;
+
+    const queryBuilder = this.ticketRepository
+      .createQueryBuilder('ticket')
+      .leftJoinAndSelect('ticket.solicitante', 'solicitante')
+      .leftJoinAndSelect('ticket.tecnico', 'tecnico');
+
+    if (estado) {
+      queryBuilder.andWhere('ticket.estado = :estado', { estado });
+    }
+
+    if (prioridad) {
+      queryBuilder.andWhere('ticket.prioridad = :prioridad', { prioridad });
+    }
+
+    if (categoria) {
+      queryBuilder.andWhere('ticket.categoria = :categoria', { categoria });
+    }
+
+    if (search) {
+      queryBuilder.andWhere(
+        '(LOWER(ticket.titulo) LIKE LOWER(:search) OR LOWER(ticket.descripcion) LIKE LOWER(:search))',
+        { search: `%${search}%` },
+      );
+    }
+
+    if (tecnico) {
+      queryBuilder.andWhere('tecnico.id = :tecnicoId', { tecnicoId: tecnico });
+    }
+
+    if (solicitante) {
+      queryBuilder.andWhere('solicitante.id = :solicitanteId', { solicitanteId: solicitante });
+    }
+
+    queryBuilder.orderBy('ticket.fecha_creado', 'DESC');
+
+    const total = await queryBuilder.getCount();
+
+    const tickets = await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
+
+    const data = tickets.map(ticket => ({
+      id: ticket.id,
+      numero: ticket.numero_ticket,
+      titulo: ticket.titulo,
+      descripcion: ticket.descripcion,
+      estado: ticket.estado,
+      prioridad: ticket.prioridad,
+      categoria: ticket.categoria,
+      fecha_creado: ticket.fecha_creado,
+      fecha_cierra: ticket.fecha_cierre,
+      fecha_actualizacion: ticket.fecha_actualizacion,
+      solicitante: ticket.solicitante
+        ? `${ticket.solicitante.nombres} ${ticket.solicitante.apellidos}`
+        : null,
+      tecnico: ticket.tecnico
+        ? `${ticket.tecnico.nombres} ${ticket.tecnico.apellidos}`
+        : null,
+    }));
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async findOne(id: number) {

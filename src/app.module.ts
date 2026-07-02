@@ -8,6 +8,7 @@ import { SeedModule } from 'src/modules/seed/seed.module';
 import { TicketsModule } from 'src/modules/tickets/tickets.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ComentariosModule } from './modules/comentarios/comentarios.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 
@@ -32,7 +33,8 @@ import { RolesGuard } from './common/guards/roles.guard';
     SeedModule,
     TicketsModule,
     AuthModule,
-    ComentariosModule
+    ComentariosModule,
+    DashboardModule
   ],
   controllers: [],
   providers: [

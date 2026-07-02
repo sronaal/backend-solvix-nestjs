@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ValidationPipe } from '@nestjs/common';
 import { TicketsService } from './tickets.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
+import { QueryTicketDto } from './dto/query-ticket.dto';
+import { Roles } from '../../common/decorators/roles.decorator';
 
 @Controller('tickets')
 export class TicketsController {
@@ -13,8 +15,10 @@ export class TicketsController {
   }
 
   @Get()
-  findAllTicketsForTabla() {
-    return this.ticketsService.findAllTicketsForTabla();
+  findAllTicketsForTabla(
+    @Query(new ValidationPipe({ transform: true })) query: QueryTicketDto,
+  ) {
+    return this.ticketsService.findAllWithFilters(query);
   }
 
   @Get(':id')
@@ -35,6 +39,7 @@ export class TicketsController {
     return this.ticketsService.update(id, updateTicketDTO)
   }
 
+  @Roles('ADMIN', 'TECNICO')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.ticketsService.remove(id);
